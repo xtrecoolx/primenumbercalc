@@ -1,6 +1,7 @@
 const express = require('express');
 const os = require('os');
 const bodyParser = require('body-parser');
+const factorCalculator = require('./factorCalculator');
 
 const app = express();
 app.use(bodyParser.json());
@@ -19,7 +20,8 @@ app.post('/api/calculatePrimes', (req, res) => {
     return res.send({ error: true, message: 'Please provide a valid number' });
   }
 
-  return res.send({ error: false, message: userValue });
+  factorCalculator.generateFactors(userValue).then(sum => res.send({ error: false, message: sum }));
+  // return res.send({ error: false, message: userValue });
 });
 
 app.listen(process.env.PORT || 8080, () => console.log(`Listening on port ${process.env.PORT || 8080}!`));

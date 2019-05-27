@@ -56,7 +56,7 @@ export default class App extends Component {
             <input type="submit" />
           </form>
         </div>
-        <div>{primes ? <h3>{`Here are the primes: ${primes}`}</h3> : <h3>Hang on</h3>}</div>
+        <div>{primes ? <h3>{`Here are the primes: ${primes}`}</h3> : null}</div>
       </div>
     );
   }
