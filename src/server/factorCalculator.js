@@ -10,46 +10,72 @@ module.exports = {
     return true;
   },
 
-  detectCorrectPrimes(userValue, factorsArray) {
+  async detectCorrectPrimes(userValue, factorsArray, tempArray) {
     const realFactorsArray = [];
     let isFoundProduct = false;
+    let secondMultiplierArray = [];
+    let productObjectArray = [];
 
-    console.log(`Factors: ${factorsArray}`);
+    if (typeof tempArray === 'undefined') {
+      secondMultiplierArray = factorsArray.slice();
+    } else {
+      productObjectArray = tempArray.slice();
+      secondMultiplierArray = tempArray.slice();
+    }
 
     for (let x = 0; x < factorsArray.length && !isFoundProduct; x += 1) {
       const firstNumber = factorsArray[x];
-      for (let y = 0; y < factorsArray.length; y += 1) {
-        const secondNumber = factorsArray[y];
+      for (let y = 0; y < secondMultiplierArray.length; y += 1) {
+        let secondNumber = secondMultiplierArray[y];
+        if (typeof tempArray !== 'undefined') {
+          secondNumber = secondMultiplierArray[y].result;
+          console.log(`f:${firstNumber} s:${secondNumber} `);
+        }
         const product = firstNumber * secondNumber;
-        // console.log(`Product: ${product}`);
 
         if (product === userValue) {
-          console.log(`x:${x} y:${y} `);
-          realFactorsArray.push(firstNumber);
-          realFactorsArray.push(secondNumber);
+          if (!realFactorsArray.includes(firstNumber)) realFactorsArray.push(firstNumber);
+          if (!realFactorsArray.includes(secondNumber)) realFactorsArray.push(secondNumber);
           isFoundProduct = true;
+        } else if (product < userValue) {
+          const productObj = { first: firstNumber, second: secondNumber, result: product };
+          if (typeof tempArray !== 'undefined') {
+            // eslint-disable-next-line max-len
+            if (tempArray.find(o => o.result !== product)) {
+              productObjectArray.push(productObj);
+            }
+          } else productObjectArray.push(productObj);
         }
       }
     }
 
-    return realFactorsArray;
+    if (isFoundProduct) {
+      console.log(`Factors are: ${realFactorsArray}`);
+      return realFactorsArray;
+    }
+    return this.detectCorrectPrimes(userValue, factorsArray, productObjectArray);
   },
 
   async generateFactors(userValue) {
     const factorsArray = [];
-
     for (let i = 2; i < userValue; i += 1) {
       const isPrime = this.isPrimeNumber(i);
       if (isPrime) {
         let multipliedValue = i;
-        while (multipliedValue <= userValue) {
-          factorsArray.push(multipliedValue);
-          multipliedValue *= multipliedValue;
+        let multiplier = 1;
+        while (multipliedValue < userValue) {
+          multipliedValue = i;
+          multipliedValue **= multiplier;
+          if (multipliedValue < userValue) {
+            // console.log(multipliedValue);
+            factorsArray.push(multipliedValue);
+            multiplier += 1;
+          }
         }
       }
     }
 
-    const primeFactors = this.detectCorrectPrimes(userValue, factorsArray);
+    const primeFactors = await this.detectCorrectPrimes(userValue, factorsArray);
     return primeFactors;
   }
 };
