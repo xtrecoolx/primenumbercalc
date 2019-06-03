@@ -21,7 +21,6 @@ app.post('/api/calculatePrimes', (req, res) => {
   }
 
   factorCalculator.generateFactors(userValue).then(sum => res.send({ error: false, message: sum }));
-  // return res.send({ error: false, message: userValue });
 });
 
 app.listen(process.env.PORT || 8080, () => console.log(`Listening on port ${process.env.PORT || 8080}!`));
