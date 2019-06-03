@@ -10,7 +10,7 @@ module.exports = {
     return true;
   },
 
-  async detectCorrectPrimes(userValue, factorsArray, tempArray) {
+  async detectCorrectFactors(userValue, factorsArray, tempArray) {
     const realFactorsArray = [];
     let isFoundProduct = false;
     let secondMultiplierArray = [];
@@ -26,11 +26,7 @@ module.exports = {
     for (let x = 0; x < factorsArray.length && !isFoundProduct; x += 1) {
       const firstNumber = factorsArray[x];
       for (let y = 0; y < secondMultiplierArray.length; y += 1) {
-        let secondNumber = secondMultiplierArray[y];
-        if (typeof tempArray !== 'undefined') {
-          secondNumber = secondMultiplierArray[y].result;
-          console.log(`f:${firstNumber} s:${secondNumber} `);
-        }
+        const secondNumber = secondMultiplierArray[y];
         const product = firstNumber * secondNumber;
 
         if (product === userValue) {
@@ -38,22 +34,16 @@ module.exports = {
           if (!realFactorsArray.includes(secondNumber)) realFactorsArray.push(secondNumber);
           isFoundProduct = true;
         } else if (product < userValue) {
-          const productObj = { first: firstNumber, second: secondNumber, result: product };
-          if (typeof tempArray !== 'undefined') {
-            // eslint-disable-next-line max-len
-            if (tempArray.find(o => o.result !== product)) {
-              productObjectArray.push(productObj);
-            }
-          } else productObjectArray.push(productObj);
+          if (!productObjectArray.includes(product)) productObjectArray.push(product);
         }
       }
     }
 
     if (isFoundProduct) {
-      console.log(`Factors are: ${realFactorsArray}`);
+      console.log(`Real factors are: ${realFactorsArray}`);
       return realFactorsArray;
     }
-    return this.detectCorrectPrimes(userValue, factorsArray, productObjectArray);
+    return this.detectCorrectFactors(userValue, factorsArray, productObjectArray);
   },
 
   async generateFactors(userValue) {
@@ -75,7 +65,24 @@ module.exports = {
       }
     }
 
-    const primeFactors = await this.detectCorrectPrimes(userValue, factorsArray);
+    const userValueFactors = await this.detectCorrectFactors(userValue, factorsArray);
+    const primeFactors = await this.checkUserValueFactorsForPrimes(userValueFactors, factorsArray);
     return primeFactors;
+  },
+  async checkUserValueFactorsForPrimes(userValueFactors, factorsArray) {
+    let isPrimeFree = true;
+    for (let x = 0; x < userValueFactors.length; x += 1) {
+      if (!this.isPrimeNumber(userValueFactors[x])) {
+        // eslint-disable-next-line no-await-in-loop
+        const newPrimeFactors = await this.detectCorrectFactors(userValueFactors[x], factorsArray);
+        userValueFactors.splice(x, 1);
+        userValueFactors.push(newPrimeFactors[0]);
+        userValueFactors.push(newPrimeFactors[1]);
+        console.log(`Prime Factors: ${userValueFactors}`);
+        isPrimeFree = false;
+      }
+    }
+    if (!isPrimeFree) return this.checkUserValueFactorsForPrimes(userValueFactors, factorsArray);
+    return userValueFactors;
   }
 };
